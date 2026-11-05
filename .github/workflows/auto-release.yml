@@ -1,0 +1,135 @@
+name: Auto release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - VERSION.md
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Choose the next version
+        id: version
+        shell: bash
+        run: |
+          release_date="$(TZ=Asia/Shanghai date +%Y.%m.%d)"
+          last_number="$(git tag --list "v${release_date}.*" | sed -E 's/.*\.([0-9]+)$/\1/' | sort -n | tail -1)"
+          next_number="$(( ${last_number:-0} + 1 ))"
+          previous_tag="$(git tag --sort=-version:refname | head -n 1)"
+          echo "version=v${release_date}.${next_number}" >> "$GITHUB_OUTPUT"
+          echo "released_at=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=${previous_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes and changelog
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          RELEASED_AT: ${{ steps.version.outputs.released_at }}
+          PREVIOUS_TAG: ${{ steps.version.outputs.previous_tag }}
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: |
+          if [ -n "$PREVIOUS_TAG" ]; then
+            range="${PREVIOUS_TAG}..${SOURCE_COMMIT}"
+          else
+            range="$SOURCE_COMMIT"
+          fi
+
+          git log --reverse --format='- **%s**%n%b%n' "$range" > release-items.md
+          perl -0pi -e 's/\\n/\n/g' release-items.md
+          if [ ! -s release-items.md ]; then
+            echo '- 完成本次 Skill 更新。' > release-items.md
+          fi
+
+          cat > RELEASE_NOTES.md <<EOF
+          ## 本次更新
+
+          $(cat release-items.md)
+
+          **发布时间：** ${RELEASED_AT}<br>
+          **对应提交：** ${SOURCE_COMMIT}
+          EOF
+
+          old_entries="$(mktemp)"
+          if [ -f CHANGELOG.md ]; then
+            awk 'found { print } /<!-- releases -->/ { found=1 }' CHANGELOG.md > "$old_entries"
+          fi
+
+          cat > CHANGELOG.md <<EOF
+          # 更新日志
+
+          这里按版本记录每次发布的主要变化，最新版本排在最前面。每个版本的安装包和同一份说明也可以在 GitHub Releases 页面查看。
+
+          <!-- releases -->
+
+          ## ${VERSION}
+
+          $(cat release-items.md)
+
+          **发布时间：** ${RELEASED_AT}<br>
+          **对应提交：** ${SOURCE_COMMIT}
+
+          $(cat "$old_entries")
+          EOF
+
+      - name: Write version proof
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          RELEASED_AT: ${{ steps.version.outputs.released_at }}
+          SOURCE_COMMIT: ${{ github.sha }}
+        run: |
+          cat > VERSION.md <<EOF
+          # Skill 版本证明
+
+          - Version: ${VERSION}
+          - Released: ${RELEASED_AT}
+          - Source commit: ${SOURCE_COMMIT}
+          - Repository: https://github.com/sky-6688-lap/lx-experience-productize-coach
+
+          当用户要求更新本 Skill 时，Agent 应在后台比较 GitHub 与本地的 Version 和 Source commit。两者一致后，只需向用户回复“已更新到 <Version>”；如果仍不一致，回复“更新未成功”，不要用术语增加用户负担。
+          EOF
+
+      - name: Commit version proof and create tag
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add VERSION.md CHANGELOG.md
+          git commit -m "release ${VERSION} [skip ci]"
+          git tag -a "$VERSION" -m "$VERSION"
+          git push origin HEAD:main "$VERSION"
+
+      - name: Build verifiable Skill package
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git archive --format=zip --prefix=lx-experience-productize-coach/ -o lx-experience-productize-coach.zip "$VERSION"
+          sha256sum lx-experience-productize-coach.zip > SHA256SUMS
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$VERSION" \
+            lx-experience-productize-coach.zip \
+            SHA256SUMS \
+            --title "$VERSION" \
+            --notes-file RELEASE_NOTES.md
