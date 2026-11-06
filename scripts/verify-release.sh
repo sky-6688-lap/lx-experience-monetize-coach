@@ -68,6 +68,7 @@ checks = {
         "## 四、一票否决清单",
         "## 七、90 天：三段动作",
         "monetization-resources.md",
+        "一律按 L1 处理",
     ],
     "references/monetization-resources.md": [
         "## 使用规则",
@@ -85,6 +86,8 @@ checks = {
         "二、判断依据",
         "三、验证行动",
         "交接模块使用比正文更轻的样式",
+        "只是占位",
+        "并入右格",
     ],
     "references/boundaries-and-handoff.md": [
         "## 本 Skill 的完成边界",

@@ -1,8 +1,8 @@
 # Skill 版本证明
 
-- Version: v2026.11.06.3
-- Released: 2026-11-06 13:20:11 CST
-- Source commit: 7ffc67886f5cfcff9e0d3b56e56caef7b0a8aedf
+- Version: v2026.11.06.4
+- Released: 2026-11-06 15:16:23 CST
+- Source commit: b1ce4da896be833e8ee49807ba5eb5fc9039a9c8
 - Repository: https://github.com/sky-6688-lap/lx-experience-productize-coach
 
-当用户要求更新本 Skill 时，Agent 应在后台比较 GitHub 与本地的 Version 和 Source commit。两者一致后，只需向用户回复“已更新到 v2026.11.06.3”；如果仍不一致，回复“更新未成功”，不要用术语增加用户负担。
+当用户要求更新本 Skill 时，Agent 应在后台比较 GitHub 与本地的 Version 和 Source commit。两者一致后，只需向用户回复“已更新到 v2026.11.06.4”；如果仍不一致，回复“更新未成功”，不要用术语增加用户负担。
