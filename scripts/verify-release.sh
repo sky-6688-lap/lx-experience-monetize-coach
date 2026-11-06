@@ -50,7 +50,10 @@ if not skill.startswith("---\n") or "name: lx-experience-productize-coach" not i
     raise SystemExit("校验失败：SKILL.md frontmatter 不完整")
 
 checks = {
-    "SKILL.md": ["# 个人经验产品化 Skill"],
+    "SKILL.md": [
+        "# 个人经验产品化 Skill",
+        "进入形式选择前，先看身份边界",
+    ],
     "agents/openai.yaml": ['display_name: "个人经验产品化 Skill"'],
     "assets/report-example.html": [
         '<span class="group-title">产品构想</span>',
@@ -74,6 +77,10 @@ checks = {
         "一律按 L1 处理",
         "不想跟人打交道",
         "「教」只保留**录播课、图文课、预录音频**",
+        "## 九、合规与表述红线",
+        "在职公职人员、事业单位与国企员工",
+        "职务成果与客户资料",
+        "平台与场域分开看",
     ],
     "references/monetization-resources.md": [
         "## 使用规则",
