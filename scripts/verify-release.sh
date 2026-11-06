@@ -28,6 +28,9 @@ root = Path(sys.argv[1])
 
 required_files = [
     "SKILL.md",
+    "README.md",
+    "VERSION.md",
+    "LICENSE",
     "agents/openai.yaml",
     "assets/report-example.html",
     "references/html-report.md",
@@ -99,6 +102,10 @@ checks = {
         "## 完整收尾",
         "## 交接模块：接往「零基础做课 Skill」",
         "只指向一个地址：`https://github.com/sky-6688-lap/lx-zero-to-course`",
+        "逐条回",
+    ],
+    "LICENSE": [
+        "MIT License",
     ],
 }
 
