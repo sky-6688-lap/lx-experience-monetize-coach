@@ -53,7 +53,6 @@ checks = {
         '<span class="group-title">验证行动</span>',
         "<span>个人经验产品化 Skill</span>",
         "下一步（可选）",
-        "打开零基础做课 Skill",
         "https://github.com/sky-6688-lap/lx-zero-to-course",
     ],
     "references/html-report.md": [
@@ -108,6 +107,9 @@ found_urls = set(re.findall(r"https?://[^\s)）\"'<>]+", report_html))
 extra = found_urls - allowed_urls
 if extra:
     raise SystemExit(f"校验失败：报告模板出现未允许的链接：{sorted(extra)}")
+
+if "handoff-btn" in report_html or 'target="_blank"' in report_html:
+    raise SystemExit("校验失败：报告模板不应包含跳转网站的打开链接按钮")
 
 class ReportParser(HTMLParser):
     pass
