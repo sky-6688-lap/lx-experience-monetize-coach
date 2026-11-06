@@ -175,6 +175,23 @@ for relative in required_files + ["README.md", "SKILL.md"]:
 if "handoff-btn" in report_html or "打开零基础做课 Skill" in report_html:
     raise SystemExit("校验失败：报告模板不应包含跳转网站的打开链接按钮")
 
+# 口径一致性守门：同一规则的数值在所有文件里必须一致，废弃旧值不许回潮
+stale_patterns = [r"150 字", r"四个格子", r"(?<!前)四阶段", r"三个部分"]
+for path in sorted(root.rglob("*.md")):
+    if "CHANGELOG" in path.name or "dist" in path.parts:
+        continue
+    text = path.read_text(encoding="utf-8")
+    for pattern in stale_patterns:
+        if re.search(pattern, text):
+            raise SystemExit(f"校验失败：{path.relative_to(root)} 仍出现废弃口径 {pattern}")
+
+for rel in ["references/boundaries-and-handoff.md", "tests/regression-checklist.md"]:
+    text = (root / rel).read_text(encoding="utf-8")
+    if "200 字" not in text:
+        raise SystemExit(f"校验失败：{rel} 缺越界回复的 200 字上限")
+    if "同上" not in text:
+        raise SystemExit(f"校验失败：{rel} 缺「不许写同上」这一条")
+
 class ReportParser(HTMLParser):
     pass
 
