@@ -8,7 +8,7 @@ temp_dir=""
 
 cleanup() {
   if [[ -n "$temp_dir" && -d "$temp_dir" ]]; then
-    rm -rf "$temp_dir"
+    rm -rf "$temp_dir" 2>/dev/null || true
   fi
 }
 trap cleanup EXIT
