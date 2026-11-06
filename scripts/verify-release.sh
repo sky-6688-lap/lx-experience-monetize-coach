@@ -69,6 +69,8 @@ checks = {
         "## 七、90 天：三段动作",
         "monetization-resources.md",
         "一律按 L1 处理",
+        "不想跟人打交道",
+        "「教」只保留**录播课、图文课、预录音频**",
     ],
     "references/monetization-resources.md": [
         "## 使用规则",
@@ -88,6 +90,9 @@ checks = {
         "交接模块使用比正文更轻的样式",
         "只是占位",
         "并入右格",
+        "## 快速版最小内容",
+        "90 天三段",
+        "精选入口",
     ],
     "references/boundaries-and-handoff.md": [
         "## 本 Skill 的完成边界",
@@ -149,6 +154,16 @@ if extra:
 report_resources = found_urls - {repo_url}
 if len(report_resources) > 8:
     raise SystemExit(f"校验失败：报告精选入口超过 8 条（当前 {len(report_resources)} 条）")
+
+bad_terms = ["四个阶段", "四阶段完成", "三个阶段", "三个部分"]
+for relative in required_files + ["README.md", "SKILL.md"]:
+    path = root / relative
+    if not path.exists():
+        continue
+    text = path.read_text(encoding="utf-8")
+    for term in bad_terms:
+        if term in text:
+            raise SystemExit(f"校验失败：{relative} 仍出现旧口径「{term}」")
 
 if "handoff-btn" in report_html or "打开零基础做课 Skill" in report_html:
     raise SystemExit("校验失败：报告模板不应包含跳转网站的打开链接按钮")
