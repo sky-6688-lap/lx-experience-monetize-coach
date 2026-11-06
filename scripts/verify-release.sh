@@ -32,6 +32,8 @@ required_files = [
     "assets/report-example.html",
     "references/html-report.md",
     "references/boundaries-and-handoff.md",
+    "references/monetization-paths.md",
+    "references/monetization-resources.md",
     "tests/regression-checklist.md",
     "tests/test-cases.md",
 ]
@@ -51,9 +53,31 @@ checks = {
         '<span class="group-title">产品构想</span>',
         '<span class="group-title">判断依据</span>',
         '<span class="group-title">验证行动</span>',
+        '<span class="group-title">变现与下一步</span>',
+        "精选入口",
+        "暂不建议",
+        "res-note",
         "<span>个人经验产品化 Skill</span>",
         "下一步（可选）",
         "https://github.com/sky-6688-lap/lx-zero-to-course",
+    ],
+    "references/monetization-paths.md": [
+        "## 一、先问三个问题",
+        "## 二、六种收钱方式",
+        "## 三、六维匹配打分",
+        "## 四、一票否决清单",
+        "## 七、90 天：三段动作",
+        "monetization-resources.md",
+    ],
+    "references/monetization-resources.md": [
+        "## 使用规则",
+        "## 一、直接能收钱的渠道",
+        "## 二、需求与行业验证（免费公开数据）",
+        "## 四、开源制作工具",
+        "https://mbd.pub/",
+        "https://xiaobot.net/",
+        "https://afdian.com/",
+        "https://www.xiaoe-tech.com/",
     ],
     "references/html-report.md": [
         "### 核心设计原则",
@@ -91,9 +115,16 @@ import re
 link_pattern = re.compile(r"https?://(?!github\.com)[^\s)）\"'<>]+")
 contact_pattern = re.compile(r"(微信号?|QQ|电话|手机号)\s*[:：]\s*\S")
 
+# 资源清单与报告模板自有链接白名单，不参与“禁止外部链接”检查
+whitelist_files = {
+    "assets/report-example.html",
+    "references/monetization-paths.md",
+    "references/monetization-resources.md",
+}
+
 for relative in required_files + ["README.md", "SKILL.md"]:
     path = root / relative
-    if path.exists():
+    if path.exists() and relative not in whitelist_files:
         text = path.read_text(encoding="utf-8")
         # 不出现外部文章链接与任何联系方式
         found_link = link_pattern.search(text)
@@ -102,13 +133,21 @@ for relative in required_files + ["README.md", "SKILL.md"]:
         if contact_pattern.search(text):
             raise SystemExit(f"校验失败：{relative} 仍包含联系方式")
 
-allowed_urls = {"https://github.com/sky-6688-lap/lx-zero-to-course"}
-found_urls = set(re.findall(r"https?://[^\s)）\"'<>]+", report_html))
-extra = found_urls - allowed_urls
-if extra:
-    raise SystemExit(f"校验失败：报告模板出现未允许的链接：{sorted(extra)}")
+repo_url = "https://github.com/sky-6688-lap/lx-zero-to-course"
+url_pattern = re.compile(r"https?://[^\s)）\"'<>|]+")
+resources = (root / "references/monetization-resources.md").read_text(encoding="utf-8")
+resource_urls = {u.rstrip("，。、;；") for u in url_pattern.findall(resources)}
 
-if "handoff-btn" in report_html or 'target="_blank"' in report_html:
+found_urls = {u.rstrip("，。、;；") for u in url_pattern.findall(report_html)}
+extra = found_urls - resource_urls - {repo_url}
+if extra:
+    raise SystemExit(f"校验失败：报告模板出现清单外链接：{sorted(extra)}")
+
+report_resources = found_urls - {repo_url}
+if len(report_resources) > 8:
+    raise SystemExit(f"校验失败：报告精选入口超过 8 条（当前 {len(report_resources)} 条）")
+
+if "handoff-btn" in report_html or "打开零基础做课 Skill" in report_html:
     raise SystemExit("校验失败：报告模板不应包含跳转网站的打开链接按钮")
 
 class ReportParser(HTMLParser):
