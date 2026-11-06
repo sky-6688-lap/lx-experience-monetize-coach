@@ -52,17 +52,22 @@ checks = {
         '<span class="group-title">判断依据</span>',
         '<span class="group-title">验证行动</span>',
         "<span>个人经验产品化 Skill</span>",
+        "下一步（可选）",
+        "打开零基础做课 Skill",
+        "https://github.com/sky-6688-lap/lx-zero-to-course",
     ],
     "references/html-report.md": [
         "### 核心设计原则",
         "一、产品构想",
         "二、判断依据",
         "三、验证行动",
+        "交接模块使用比正文更轻的样式",
     ],
     "references/boundaries-and-handoff.md": [
         "## 本 Skill 的完成边界",
         "## 完整收尾",
-        "不附加任何“更适合你的下一步”后续路径模块",
+        "## 交接模块：接往「零基础做课 Skill」",
+        "只指向一个地址：`https://github.com/sky-6688-lap/lx-zero-to-course`",
     ],
 }
 
@@ -97,6 +102,12 @@ for relative in required_files + ["README.md", "SKILL.md"]:
             raise SystemExit(f"校验失败：{relative} 仍包含外部链接：{found_link.group(0)}")
         if contact_pattern.search(text):
             raise SystemExit(f"校验失败：{relative} 仍包含联系方式")
+
+allowed_urls = {"https://github.com/sky-6688-lap/lx-zero-to-course"}
+found_urls = set(re.findall(r"https?://[^\s)）\"'<>]+", report_html))
+extra = found_urls - allowed_urls
+if extra:
+    raise SystemExit(f"校验失败：报告模板出现未允许的链接：{sorted(extra)}")
 
 class ReportParser(HTMLParser):
     pass

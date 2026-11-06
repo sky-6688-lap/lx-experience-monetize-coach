@@ -81,7 +81,7 @@ A 从真实经历发现候选；B 比较候选并检查其关系；C 围绕缺�
 
 读取 [references/boundaries-and-handoff.md](references/boundaries-and-handoff.md) 处理越界请求。用户带验证反馈回来时，从结果迭代，不重跑全套流程。
 
-快速版按实际缺口读取上述参考文件；报告仍按 `html-report.md` 交付并标记“快速初筛”。任何版本的报告都不附加后续路径、专栏或咨询承接模块。
+快速版按实际缺口读取上述参考文件；报告仍按 `html-report.md` 交付并标记“快速初筛”。任何版本的报告都不附加专栏、咨询或购买承接模块；唯一允许的后续内容是 [references/boundaries-and-handoff.md](references/boundaries-and-handoff.md) 定义的交接模块（方向未聚焦或用户不做课时省略）。
 
 ## 维护模式
 
